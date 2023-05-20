@@ -65,6 +65,7 @@ def isolation_forrest():
 
 def local_outlier_factor():
     print('-LOCAL OUTLIER FACTOR-')
+
     df_norm = df.copy()
     train, test = train_test_split(df_norm, test_size=0.3, random_state=10)
     X_test = test.drop(['Class'], axis=1)
