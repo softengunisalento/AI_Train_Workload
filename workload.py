@@ -22,7 +22,7 @@ load_dotenv('.env')
 class Workload:
     def __init__(self):
         self.tracker = EmissionsTracker(measure_power_secs=5 * 60, tracking_mode='process')
-        self.df = pd.read_csv('~/AI_Train_Workload/creditcard.csv')
+        self.df = pd.read_csv(os.getenv('DATASET_CSV'))
 
     def isolation_forrest(self, n_estimators=20, max_samples=100, contamination=0.01, random_state=42, verbose=2):
         print('-ISOLATION FORREST-')
