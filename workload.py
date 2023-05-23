@@ -16,7 +16,7 @@ from custom_emissions_tracker import EmissionsTracker
 
 from dotenv import load_dotenv
 
-load_dotenv('.env')
+load_dotenv()
 
 
 class Workload:
