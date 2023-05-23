@@ -24,6 +24,7 @@ class Workload:
         self.tracker = EmissionsTracker(measure_power_secs=5 * 60, tracking_mode='process')
         try:
             print('THIS IS ENV ', os.getenv('DATASET_CSV'))
+
         except Exception as ex:
             print("EXCEPTION, I TRIED TO READ")
         self.df = pd.read_csv(os.getenv('DATASET_CSV'))
