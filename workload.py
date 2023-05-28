@@ -79,7 +79,8 @@ class Workload:
         best_auc = sorted(auc_score, key=lambda d: d['auc'])[-1]
         return best_auc
 
-    def autoencoder(self, learning_rate=0.00001, first_layer=16, second_layer=8, third_layer=4):
+    def autoencoder(self, learning_rate=0.00001, first_layer=16, second_layer=14, third_layer=12, fourth_layer=10,
+                    fifth_layer=8, sixth_layer=6, seventh_layer=4, patience=5, verbose=1):
         print('-AUTOENCODER-')
         df_sc = self.df.copy()
         df_sc['Time'] = StandardScaler().fit_transform(df_sc['Time'].values.reshape(-1, 1))
@@ -93,6 +94,14 @@ class Workload:
         encoder = Dense(first_layer, activation='elu', activity_regularizer=regularizers.l1(learning_rate))(input_layer)
         encoder = Dense(second_layer, activation='relu')(encoder)
         encoder = Dense(third_layer, activation='relu')(encoder)
+        encoder = Dense(fourth_layer, activation='relu')(encoder)
+        encoder = Dense(fifth_layer, activation='relu')(encoder)
+        encoder = Dense(sixth_layer, activation='relu')(encoder)
+        encoder = Dense(seventh_layer, activation='relu')(encoder)
+        encoder = Dense(sixth_layer, activation='relu')(encoder)
+        encoder = Dense(fifth_layer, activation='relu')(encoder)
+        encoder = Dense(fourth_layer, activation='relu')(encoder)
+        encoder = Dense(third_layer, activation='relu')(encoder)
         decoder = Dense(second_layer, activation='relu')(encoder)
         decoder = Dense(first_layer, activation='relu')(decoder)
         decoder = Dense(input_dim, activation='elu')(decoder)
@@ -100,7 +109,7 @@ class Workload:
         autoencoder.compile(optimizer='adam',
                             metrics=['accuracy'],
                             loss='mean_squared_error')
-        EarlyStopping(monitor='accuracy', patience=5, verbose=1)
+        EarlyStopping(monitor='accuracy', patience=patience, verbose=verbose)
         autoencoder.summary()
 
     def svm(self, random_state=42, nu=0.1, tol=1e-4):
@@ -118,9 +127,9 @@ class Workload:
         pred[pred == -1] = 1
 
     def grid_search_svm(self):
-        random_state = [42, 142, 1420, 14200]
-        nu = [0.1, 0.01, 0.001, 0.0001]
-        tol = [1e-4, 1e-5, 1e-6, 1e-7]
+        random_state = [42, 142, 1420, 14200, 142000]
+        nu = [0.1, 0.01, 0.001, 0.0001, 0.0001]
+        tol = [1e-4, 1e-5, 1e-6, 1e-7, 1e-8]
         for rand_state in random_state:
             for n in nu:
                 for t in tol:
@@ -128,19 +137,28 @@ class Workload:
 
     def grid_search_autoencoder(self):
         learing_rates = [0.1, 0.001, 0.0001, 0.00001]
-        layers = [[32, 16, 8], [64, 32, 16], [128, 64, 32], [256, 128, 64]]
+        layers = [
+            [2048, 1024, 512, 256, 128, 64, 32],
+            [4056, 2048, 1024, 512, 256, 128, 64],
+            [8162, 4056, 2048, 1024, 512, 256, 128],
+            [16224, 8162, 4056, 2048, 1024, 512, 256]]
+        verb = [1, 2, 10, 100]
+        pat = [5, 25, 50, 500]
         for learn in learing_rates:
 
             for layer in layers:
-                self.autoencoder(learn, *layer)
+                for v in verb:
+                    for p in pat:
+                        print(f'params: layer {layer} verbose {v} patience {p} learning {learn}')
+                        self.autoencoder(learn, *layer, patience=p, verbose=v)
 
     def compute_workload_consumption(self, workload: str):
         try:
 
-            if os.path.exists(f"consumption_tracked/{workload}_consumption.csv"):
-                os.remove(f"consumption_tracked/{workload}_consumption.csv")
-            if os.path.exists(f"consumption_tracked/Custom_consumption.csv"):
-                os.remove(f"consumption_tracked/Custom_consumption.csv")
+            if os.path.exists(f"{os.getenv('CONSUMPTION_DIR')}/{workload}_consumption.csv"):
+                os.remove(f"{os.getenv('CONSUMPTION_DIR')}/{workload}_consumption.csv")
+            if os.path.exists(f"{os.getenv('CONSUMPTION_DIR')}/Custom_consumption.csv"):
+                os.remove(f"{os.getenv('CONSUMPTION_DIR')}/Custom_consumption.csv")
 
             print('-Start tracking energy consumption-')
             self.tracker.start()
@@ -152,7 +170,7 @@ class Workload:
                 self.grid_search_autoencoder()
 
             self.tracker.stop()
-            os.rename('consumption_tracked/Custom_Consumption.csv',
-                      f"consumption_tracked/{workload}_consumption.csv")
+            os.rename(f"{os.getenv('CONSUMPTION_DIR')}/Custom_Consumption.csv",
+                      f"{os.getenv('CONSUMPTION_DIR')}/{workload}_consumption.csv")
         except Exception as ex:
             print(ex)
