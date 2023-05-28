@@ -599,6 +599,7 @@ class BaseEmissionsTracker(ABC):
                 w = csv.DictWriter(f, fieldnames=consumption_dict.keys())
                 w.writerow(consumption_dict)
         else:
+            print(" LA CARTELLA CORRENTE E'", os.path.abspath(os.getenv('CONSUMPTION_DIR')))
             with open(os.path.join(os.getenv('CONSUMPTION_DIR'), "Custom_Consumption.csv"), 'w') as f:
                 w = csv.DictWriter(f, fieldnames=consumption_dict.keys())
                 w.writeheader()
