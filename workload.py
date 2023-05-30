@@ -20,8 +20,8 @@ load_dotenv()
 
 
 class Workload:
-    def __init__(self):
-        self.tracker = EmissionsTracker(measure_power_secs=15 , tracking_mode='process')
+    def __init__(self, measure_power_secs):
+        self.tracker = EmissionsTracker(measure_power_secs=measure_power_secs, tracking_mode='process')
         try:
             print('THIS IS ENV ', os.getenv('DATASET_CSV'))
 
