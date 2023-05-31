@@ -605,7 +605,7 @@ class BaseEmissionsTracker(ABC):
             #     w.writeheader()
             #     w.writerow(consumption_dict)
 
-            with open("~/AI_Train_Workload/consumption_tracked/Custom_Consumption.csv", 'w') as f:
+            with (open("~/AI_Train_Workload/consumption_tracked/Custom_Consumption.csv", 'w')) as f:
                 w = csv.DictWriter(f, fieldnames=consumption_dict.keys())
                 w.writeheader()
                 w.writerow(consumption_dict)
