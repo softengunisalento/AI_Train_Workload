@@ -606,9 +606,7 @@ class BaseEmissionsTracker(ABC):
                     w.writeheader()
                     w.writerow(consumption_dict)
             except Exception as ex:
-
-                print(" LA CARTELLA CORRENTE E'", os.path.abspath(os.getenv('CONSUMPTION_DIR')))
-                raise  ex
+                print("LA CARTELLA CORRENTE E'", os.path.abspath(os.getenv('CONSUMPTION_DIR')))
 
     def __enter__(self):
         self.start()
