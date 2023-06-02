@@ -57,7 +57,7 @@ class Workload:
         print("GRID-SEARCH-ISOLATION FORREST IS STARTING")
         estimators = [20, 40, 60]
         max_samples = [100, 200, 400]
-        contamination = [0.1, 0.01]#[0.1, 0.01, 0.001]
+        contamination = [0.1, 0.01, 0.001]
         random_states = [42]#[42, 62, 82]
         verbose = [8]#[8, 16, 32]
         auc_score = []
@@ -170,7 +170,7 @@ class Workload:
                 self.grid_search_autoencoder()
 
             self.tracker.stop()
-            os.rename(f"{os.getenv('CONSUMPTION_DIR')}/Custom_Consumption.csv",
-                      f"{os.getenv('CONSUMPTION_DIR')}/{workload}_consumption.csv")
+            os.rename(os.path.join(os.getenv('CONSUMPTION_DIR'), "Custom_Consumption.csv"),
+                      os.path.join(os.getenv('CONSUMPTION_DIR'), f"{workload}.csv"))
         except Exception as ex:
             print(ex)

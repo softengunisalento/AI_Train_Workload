@@ -594,8 +594,8 @@ class BaseEmissionsTracker(ABC):
             "ram_energy_consumed": self._total_ram_energy.kWh,
             "total_consumption": self._total_energy.kWh
         }
-        if os.path.exists(f"{os.getenv('CONSUMPTION_DIR')}/Custom_Consumption.csv"):
-            with open(f"{os.getenv('CONSUMPTION_DIR')}/Custom_Consumption.csv", 'a') as f:
+        if os.path.exists(os.path.join(os.getenv('CONSUMPTION_DIR'), "Custom_Consumption.csv")):
+            with open(os.path.join(os.getenv('CONSUMPTION_DIR'), "Custom_Consumption.csv"), 'a') as f:
                 w = csv.DictWriter(f, fieldnames=consumption_dict.keys())
                 w.writerow(consumption_dict)
         else:
