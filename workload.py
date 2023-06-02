@@ -58,8 +58,8 @@ class Workload:
         estimators = [20, 40, 60]
         max_samples = [100, 200, 400]
         contamination = [0.1, 0.01, 0.001]
-        random_states = [42]#[42, 62, 82]
-        verbose = [8]#[8, 16, 32]
+        random_states = [42, 62, 82]
+        verbose = [8, 16, 32]
         auc_score = []
         for est in estimators:
             for samps in max_samples:
