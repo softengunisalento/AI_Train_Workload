@@ -56,7 +56,7 @@ class Workload:
     def grid_search_isolation_forrest(self):
         print("GRID-SEARCH-ISOLATION FORREST IS STARTING")
         estimators = [20, 40, 60]
-        max_samples = [100]#[100, 200, 400]
+        max_samples = [100, 200, 400]
         contamination = [0.1]#[0.1, 0.01, 0.001]
         random_states = [42]#[42, 62, 82]
         verbose = [8]#[8, 16, 32]
