@@ -79,8 +79,8 @@ class Workload:
         best_auc = sorted(auc_score, key=lambda d: d['auc'])[-1]
         return best_auc
 
-    def autoencoder(self, learning_rate=0.00001, first_layer=16, second_layer=14, third_layer=12, fourth_layer=10,
-                    fifth_layer=8, sixth_layer=6, seventh_layer=4, patience=5, verbose=1):
+    def autoencoder(self, learning_rate=0.00001, input=32, first_layer=16, second_layer=14, third_layer=12, fourth_layer=10,
+                    fifth_layer=8, sixth_layer=6, seventh_layer=4, patience=5, verbose=1, act='relu'):
         print('-AUTOENCODER-')
         df_sc = self.df.copy()
         df_sc['Time'] = StandardScaler().fit_transform(df_sc['Time'].values.reshape(-1, 1))
@@ -89,21 +89,21 @@ class Workload:
         X_train = train[train['Class'] == 0]
         X_train = X_train.drop(['Class'], axis=1)
         learning_rate = learning_rate
-        input_dim = X_train.shape[1]
+        input_dim = input#X_train.shape[1]
         input_layer = Input(shape=(input_dim,))
         encoder = Dense(first_layer, activation='elu', activity_regularizer=regularizers.l1(learning_rate))(input_layer)
-        encoder = Dense(second_layer, activation='relu')(encoder)
-        encoder = Dense(third_layer, activation='relu')(encoder)
-        encoder = Dense(fourth_layer, activation='relu')(encoder)
-        encoder = Dense(fifth_layer, activation='relu')(encoder)
-        encoder = Dense(sixth_layer, activation='relu')(encoder)
-        encoder = Dense(seventh_layer, activation='relu')(encoder)
-        encoder = Dense(sixth_layer, activation='relu')(encoder)
-        encoder = Dense(fifth_layer, activation='relu')(encoder)
-        encoder = Dense(fourth_layer, activation='relu')(encoder)
-        encoder = Dense(third_layer, activation='relu')(encoder)
-        decoder = Dense(second_layer, activation='relu')(encoder)
-        decoder = Dense(first_layer, activation='relu')(decoder)
+        encoder = Dense(second_layer, activation=act)(encoder)
+        encoder = Dense(third_layer, activation=act)(encoder)
+        encoder = Dense(fourth_layer, activation=act)(encoder)
+        encoder = Dense(fifth_layer, activation=act)(encoder)
+        encoder = Dense(sixth_layer, activation=act)(encoder)
+        encoder = Dense(seventh_layer, activation=act)(encoder)
+        encoder = Dense(sixth_layer, activation=act)(encoder)
+        encoder = Dense(fifth_layer, activation=act)(encoder)
+        encoder = Dense(fourth_layer, activation=act)(encoder)
+        encoder = Dense(third_layer, activation=act)(encoder)
+        decoder = Dense(second_layer, activation=act)(encoder)
+        decoder = Dense(first_layer, activation=act)(decoder)
         decoder = Dense(input_dim, activation='elu')(decoder)
         autoencoder = Model(inputs=input_layer, outputs=decoder)
         autoencoder.compile(optimizer='adam',
@@ -111,6 +111,7 @@ class Workload:
                             loss='mean_squared_error')
         EarlyStopping(monitor='accuracy', patience=patience, verbose=verbose)
         autoencoder.summary()
+
 
     def svm(self, random_state=42, nu=0.1, tol=1e-4):
         print("-SVM-")
@@ -137,20 +138,24 @@ class Workload:
 
     def grid_search_autoencoder(self):
         learing_rates = [0.1, 0.001, 0.0001, 0.00001]
+        act_func = ['identity', 'logistic', 'tanh', 'relu', 'elu']
         layers = [
-            [2048, 1024, 512, 256, 128, 64, 32],
-            [4056, 2048, 1024, 512, 256, 128, 64],
-            [8162, 4056, 2048, 1024, 512, 256, 128],
-            [16224, 8162, 4056, 2048, 1024, 512, 256]]
+            [4056, 2048, 1024, 512, 256, 128, 64, 32],
+            [8162, 4056, 2048, 1024, 512, 256, 128, 64],
+            [16224, 8162, 4056, 2048, 1024, 512, 256, 128],
+            [32448, 16224, 8162, 4056, 2048, 1024, 512, 256]]
         verb = [1, 2, 10, 100]
         pat = [5, 25, 50, 500]
+
         for learn in learing_rates:
 
             for layer in layers:
-                for v in verb:
-                    for p in pat:
-                        print(f'params: layer {layer} verbose {v} patience {p} learning {learn}')
-                        self.autoencoder(learn, *layer, patience=p, verbose=v)
+                for act in act_func:
+                    for v in verb:
+                        for p in pat:
+                            print(f'params: layer {layer} verbose {v} patience {p} learning {learn}')
+                            self.autoencoder(learn,  *layer, patience=p, verbose=v, act=act)
+
 
     def compute_workload_consumption(self, workload: str):
         try:
