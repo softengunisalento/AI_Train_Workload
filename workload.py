@@ -138,7 +138,7 @@ class Workload:
 
     def grid_search_autoencoder(self):
         learing_rates = [0.1, 0.001, 0.0001, 0.00001]
-        act_func = ['identity', 'logistic', 'tanh', 'relu', 'elu']
+        act_func = ['sigmoid','tanh', 'relu', 'elu']
         layers = [
             [4056, 2048, 1024, 512, 256, 128, 64, 32],
             [8162, 4056, 2048, 1024, 512, 256, 128, 64],
