@@ -29,6 +29,10 @@ class Workload:
             print("EXCEPTION, I TRIED TO READ")
         self.df = pd.read_csv(os.getenv('DATASET_CSV'))
 
+    #TODO try to implet here
+    def hf_sca(self):
+        pass
+
     def isolation_forrest(self, n_estimators=20, max_samples=100, contamination=0.01, random_state=42, verbose=2):
         print('-ISOLATION FORREST-')
 
@@ -113,7 +117,7 @@ class Workload:
         EarlyStopping(monitor='accuracy', patience=patience, verbose=verbose)
         autoencoder.summary()
 
-    def svm(self, random_state=42, nu=0.1, tol=1e-4):
+    def svm(self, random_state=42, nu=0.1, tol=1e-4, fit_intercept=True, shuffle=True):
         print("-SVM-")
         df_sc = self.df.copy()
         df_sc['Time'] = StandardScaler().fit_transform(df_sc['Time'].values.reshape(-1, 1))
@@ -121,22 +125,28 @@ class Workload:
         X_train = train[train['Class'] == 0]
         X_train = X_train.drop(['Class'], axis=1)
         X_test = test.drop(['Class'], axis=1)
-        model_sgd = SGDOneClassSVM(random_state=random_state, nu=nu, fit_intercept=True, shuffle=True, tol=tol)
+        model_sgd = SGDOneClassSVM(random_state=random_state, nu=nu, fit_intercept=fit_intercept, shuffle=shuffle, tol=tol)
         model_sgd.fit(X_train)
-        pred = model_sgd.predict(X_test)
-        pred[pred == 1] = 0
-        pred[pred == -1] = 1
+        y_pred = model_sgd.predict(X_test)
+        y_pred[y_pred == 1] = 0
+        y_pred[y_pred == -1] = 1
+        return metrics.roc_auc_score(X_test, y_pred)
 
     def grid_search_svm(self):
         random_state = [42, 142, 1420, 14200, 142000]
         nu = [0.1, 0.01, 0.001, 0.0001, 0.0001]
         tol = [1e-4, 1e-5, 1e-6, 1e-7, 1e-8]
+        fit_intercept = [True, False]
+        shuffle = [True, False]
         for rand_state in random_state:
             for n in nu:
                 for t in tol:
-                    self.svm(random_state=rand_state, nu=n, tol=t)
+                    for interc in fit_intercept:
+                        for shuf in shuffle:
+                            self.svm(random_state=rand_state, nu=n, tol=t, shuffle=shuf, fit_intercept=interc)
 
     def grid_search_autoencoder(self):
+
         learing_rates = [0.1, 0.001, 0.0001, 0.00001]
         act_func = ['sigmoid', 'tanh', 'relu', 'elu']
         layers = [
