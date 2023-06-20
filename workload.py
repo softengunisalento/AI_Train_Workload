@@ -186,7 +186,7 @@ class Workload:
             if workload == 'autoencoder':
                 self.grid_search_autoencoder()
             if workload == 'hf_sca':
-                os.system(f"{os.getenv('HF_SCA')} --gpu 0")
+                os.system(f"{os.getenv('HF_SCA')}")
 
             self.tracker.stop()
             os.rename(os.path.join(os.getenv('CONSUMPTION_DIR'), "Custom_Consumption.csv"),
