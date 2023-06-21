@@ -13,7 +13,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import f1_score
 from custom_emissions_tracker import EmissionsTracker
-
+import subprocess
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -186,9 +186,9 @@ class Workload:
             if workload == 'autoencoder':
                 self.grid_search_autoencoder()
             if workload == 'hf_sca':
-                try :
+                try:
                     print("HF_SCA i starting")
-                    os.system(f"{os.getenv('HF_SCA')}")
+                    subprocess.call(['python', os.getenv('HF_SCA')])
                     print("HF_SCA job is completed")
                 except Exception as ex:
                     print(str(ex))
