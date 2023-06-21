@@ -186,9 +186,13 @@ class Workload:
             if workload == 'autoencoder':
                 self.grid_search_autoencoder()
             if workload == 'hf_sca':
-                print("HF_SCA i starting")
-                os.system(f"{os.getenv('HF_SCA')}")
-                print("HF_SCA job is completed")
+                try :
+                    print("HF_SCA i starting")
+                    os.system(f"{os.getenv('HF_SCA')}")
+                    print("HF_SCA job is completed")
+                except Exception as ex:
+                    print(str(ex))
+
 
             self.tracker.stop()
             os.rename(os.path.join(os.getenv('CONSUMPTION_DIR'), "Custom_Consumption.csv"),
