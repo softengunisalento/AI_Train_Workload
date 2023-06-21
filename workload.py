@@ -188,7 +188,7 @@ class Workload:
             if workload == 'hf_sca':
                 try:
                     print("HF_SCA i starting")
-                    subprocess.call(['python', os.getenv('HF_SCA')])
+                    subprocess.run(['python', os.getenv('HF_SCA'), "--gpu", "0"])
                     print("HF_SCA job is completed")
                 except Exception as ex:
                     print(str(ex))
