@@ -83,9 +83,7 @@ class Workload:
         best_auc = sorted(auc_score, key=lambda d: d['auc'])[-1]
         return best_auc
 
-    def autoencoder(self, learning_rate=0.00001, input=32, first_layer=16, second_layer=14, third_layer=12,
-                    fourth_layer=10,
-                    fifth_layer=8, sixth_layer=6, seventh_layer=4, patience=5, verbose=1, act='relu'):
+    def autoencoder(self, learning_rate=0.00001,  patience=5, verbose=1, act='relu'):
         print('-AUTOENCODER-')
         df_sc = self.df.copy()
         df_sc['Time'] = StandardScaler().fit_transform(df_sc['Time'].values.reshape(-1, 1))
@@ -93,34 +91,41 @@ class Workload:
         train, test = train_test_split(df_sc, test_size=0.3, random_state=10)
         X_train = train[train['Class'] == 0]
         X_train = X_train.drop(['Class'], axis=1)
+
         X_test = test.drop(['Class'], axis=1)
+        y_test = test['Class']
         learning_rate = learning_rate
-        input_dim = input  # X_train.shape[1]
+        input_dim = X_train.shape[1]
+
         input_layer = Input(shape=(input_dim,))
-        encoder = Dense(first_layer, activation='elu', activity_regularizer=regularizers.l1(learning_rate))(input_layer)
-        encoder = Dense(second_layer, activation=act)(encoder)
-        encoder = Dense(third_layer, activation=act)(encoder)
-        encoder = Dense(fourth_layer, activation=act)(encoder)
-        encoder = Dense(fifth_layer, activation=act)(encoder)
-        encoder = Dense(sixth_layer, activation=act)(encoder)
-        encoder = Dense(seventh_layer, activation=act)(encoder)
-        encoder = Dense(sixth_layer, activation=act)(encoder)
-        encoder = Dense(fifth_layer, activation=act)(encoder)
-        encoder = Dense(fourth_layer, activation=act)(encoder)
-        encoder = Dense(third_layer, activation=act)(encoder)
-        decoder = Dense(second_layer, activation=act)(encoder)
-        decoder = Dense(first_layer, activation=act)(decoder)
+
+        encoder = Dense(16, activation='elu', activity_regularizer=regularizers.l1(learning_rate))(input_layer)
+        encoder = Dense(8, activation=act)(encoder)
+        encoder = Dense(4, activation=act)(encoder)
+
+        decoder = Dense(8, activation=act)(encoder)
+        decoder = Dense(16, activation=act)(decoder)
         decoder = Dense(input_dim, activation='elu')(decoder)
+
         autoencoder = Model(inputs=input_layer, outputs=decoder)
         autoencoder.compile(optimizer='adam',
                             metrics=['accuracy'],
                             loss='mean_squared_error')
-        EarlyStopping(monitor='accuracy', patience=patience, verbose=verbose)
+
+        EarlyStop = EarlyStopping(monitor='accuracy', patience=patience, verbose=verbose)
+
         autoencoder.summary()
-        y_pred = autoencoder.predict(X_test)
+        history = autoencoder.fit(X_train, X_train,
+                                  epochs=20,
+                                  batch_size=64,
+                                  validation_data=(X_test, X_test),
+                                  callbacks=EarlyStop,
+                                  shuffle=True)
+        prediction = autoencoder.predict(X_test)
+        y_pred = prediction
         y_pred[y_pred == 1] = 0
         y_pred[y_pred == -1] = 1
-        return metrics.roc_auc_score(X_test, y_pred)
+        print("auc score :", metrics.roc_auc_score(X_test, y_pred))
 
     def svm(self, random_state=42, nu=0.1, tol=1e-4, fit_intercept=True, shuffle=True):
         print("-SVM-")
@@ -154,34 +159,24 @@ class Workload:
         grid_res = []
         learing_rates = [0.1, 0.001, 0.0001, 0.00001]
         act_func = ['sigmoid', 'tanh', 'relu', 'elu']
-        layers = [
-            [4056, 2048, 1024, 512, 256, 128, 64, 32],
-            [8162, 4056, 2048, 1024, 512, 256, 128, 64],
-            [16224, 8162, 4056, 2048, 1024, 512, 256, 128],
-            [32448, 16224, 8162, 4056, 2048, 1024, 512, 256],
-            [64896, 32448, 16224, 8162, 4056, 2048, 1024, 512],
-            [129792, 64896, 32448, 16224, 8162, 4056, 2048, 1024],
-            [259584,129792, 64896, 32448, 16224, 8162, 4056, 2048]]
+
         verb = [1, 2, 10, 100, 500]
         pat = [5, 25, 50]
 
         for learn in learing_rates:
-
-            for layer in layers:
-                for act in act_func:
-                    for v in verb:
-                        for p in pat:
-                            print(f'params: layer {layer} verbose {v} patience {p} learning {learn}')
-                            grid_res.append(
-                                {
-                                    'learning_rates': learn,
-                                    'activation_function': act,
-                                    'layer': layer,
-                                    'verbose': v,
-                                    'patience': p,
-                                    'auc': self.autoencoder(learn, *layer, patience=p, verbose=v, act=act)
-                                }
-                            )
+            for act in act_func:
+                for v in verb:
+                    for p in pat:
+                        print(f'params: verbose {v} patience {p} learning {learn}')
+                        grid_res.append(
+                            {
+                                'learning_rates': learn,
+                                'activation_function': act,
+                                'verbose': v,
+                                'patience': p,
+                                'auc': self.autoencoder(learn, patience=p, verbose=v, act=act)
+                            }
+                        )
         best_auc = sorted(grid_res, key=lambda d: d['auc'])[-1]
         print(f"Best auc:{best_auc['auc']}. Parameters:{best_auc}")
 
