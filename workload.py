@@ -93,6 +93,7 @@ class Workload:
         train, test = train_test_split(df_sc, test_size=0.3, random_state=10)
         X_train = train[train['Class'] == 0]
         X_train = X_train.drop(['Class'], axis=1)
+        X_test = test.drop(['Class'], axis=1)
         learning_rate = learning_rate
         input_dim = input  # X_train.shape[1]
         input_layer = Input(shape=(input_dim,))
@@ -116,6 +117,10 @@ class Workload:
                             loss='mean_squared_error')
         EarlyStopping(monitor='accuracy', patience=patience, verbose=verbose)
         autoencoder.summary()
+        y_pred = autoencoder.predict(X_test)
+        y_pred[y_pred == 1] = 0
+        y_pred[y_pred == -1] = 1
+        return metrics.roc_auc_score(X_test, y_pred)
 
     def svm(self, random_state=42, nu=0.1, tol=1e-4, fit_intercept=True, shuffle=True):
         print("-SVM-")
@@ -146,7 +151,7 @@ class Workload:
                             self.svm(random_state=rand_state, nu=n, tol=t, shuffle=shuf, fit_intercept=interc)
 
     def grid_search_autoencoder(self):
-
+        grid_res = []
         learing_rates = [0.1, 0.001, 0.0001, 0.00001]
         act_func = ['sigmoid', 'tanh', 'relu', 'elu']
         layers = [
@@ -167,7 +172,19 @@ class Workload:
                     for v in verb:
                         for p in pat:
                             print(f'params: layer {layer} verbose {v} patience {p} learning {learn}')
-                            self.autoencoder(learn, *layer, patience=p, verbose=v, act=act)
+                            grid_res.append(
+                                {
+                                    'learning_rates': learn,
+                                    'activation_function': act,
+                                    'layer': layer,
+                                    'verbose': v,
+                                    'patience': p,
+                                    'auc': self.autoencoder(learn, *layer, patience=p, verbose=v, act=act)
+                                }
+                            )
+        best_auc = sorted(grid_res, key=lambda d: d['auc'])[-1]
+        print(f"Best auc:{best_auc['auc']}. Parameters:{best_auc}")
+
 
     def compute_workload_consumption(self, workload: str):
         try:
