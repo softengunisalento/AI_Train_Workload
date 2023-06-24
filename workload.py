@@ -11,7 +11,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import IsolationForest
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, roc_auc_score
 from custom_emissions_tracker import EmissionsTracker
 import subprocess
 from dotenv import load_dotenv
@@ -29,7 +29,7 @@ class Workload:
             print("EXCEPTION, I TRIED TO READ")
         self.df = pd.read_csv(os.getenv('DATASET_CSV'))
 
-    #TODO try to implet here
+    # TODO try to implet here
     def hf_sca(self):
         pass
 
@@ -83,7 +83,7 @@ class Workload:
         best_auc = sorted(auc_score, key=lambda d: d['auc'])[-1]
         return best_auc
 
-    def autoencoder(self, learning_rate=0.00001,  patience=5, verbose=1, act='relu'):
+    def autoencoder(self, learning_rate=0.00001, batch_size=64, act='relu'):
         print('-AUTOENCODER-')
         df_sc = self.df.copy()
         df_sc['Time'] = StandardScaler().fit_transform(df_sc['Time'].values.reshape(-1, 1))
@@ -109,23 +109,20 @@ class Workload:
 
         autoencoder = Model(inputs=input_layer, outputs=decoder)
         autoencoder.compile(optimizer='adam',
-                            metrics=['accuracy'],
+                            metrics=['AUC'],
                             loss='mean_squared_error')
 
-        EarlyStop = EarlyStopping(monitor='accuracy', patience=patience, verbose=verbose)
+        EarlyStop = EarlyStopping(monitor='accuracy', patience=5, verbose=1)
 
         autoencoder.summary()
         history = autoencoder.fit(X_train, X_train,
                                   epochs=20,
-                                  batch_size=64,
+                                  batch_size=batch_size,
                                   validation_data=(X_test, X_test),
                                   callbacks=EarlyStop,
                                   shuffle=True)
         prediction = autoencoder.predict(X_test)
-        y_pred = prediction
-        y_pred[y_pred == 1] = 0
-        y_pred[y_pred == -1] = 1
-        print("auc score :", metrics.roc_auc_score(X_test, y_pred))
+        return history.history['auc']
 
     def svm(self, random_state=42, nu=0.1, tol=1e-4, fit_intercept=True, shuffle=True):
         print("-SVM-")
@@ -135,7 +132,8 @@ class Workload:
         X_train = train[train['Class'] == 0]
         X_train = X_train.drop(['Class'], axis=1)
         X_test = test.drop(['Class'], axis=1)
-        model_sgd = SGDOneClassSVM(random_state=random_state, nu=nu, fit_intercept=fit_intercept, shuffle=shuffle, tol=tol)
+        model_sgd = SGDOneClassSVM(random_state=random_state, nu=nu, fit_intercept=fit_intercept, shuffle=shuffle,
+                                   tol=tol)
         model_sgd.fit(X_train)
         y_pred = model_sgd.predict(X_test)
         y_pred[y_pred == 1] = 0
@@ -158,28 +156,23 @@ class Workload:
     def grid_search_autoencoder(self):
         grid_res = []
         learing_rates = [0.1, 0.001, 0.0001, 0.00001]
+        batch_size = [32, 64, 128, 256]
         act_func = ['sigmoid', 'tanh', 'relu', 'elu']
 
-        verb = [1, 2, 10, 100, 500]
-        pat = [5, 25, 50]
-
         for learn in learing_rates:
-            for act in act_func:
-                for v in verb:
-                    for p in pat:
-                        print(f'params: verbose {v} patience {p} learning {learn}')
-                        grid_res.append(
-                            {
-                                'learning_rates': learn,
-                                'activation_function': act,
-                                'verbose': v,
-                                'patience': p,
-                                'auc': self.autoencoder(learn, patience=p, verbose=v, act=act)
-                            }
-                        )
+            for b in batch_size:
+                for act in act_func:
+                    print(f'params:  learning {learn}')
+                    grid_res.append(
+                        {
+                            'batch_size': b,
+                            'learning_rates': learn,
+                            'activation_function': act,
+                            'auc': self.autoencoder(learn, batch_size=b, act=act)
+                        }
+                    )
         best_auc = sorted(grid_res, key=lambda d: d['auc'])[-1]
         print(f"Best auc:{best_auc['auc']}. Parameters:{best_auc}")
-
 
     def compute_workload_consumption(self, workload: str):
         try:
@@ -204,7 +197,6 @@ class Workload:
                     print("HF_SCA job is completed")
                 except Exception as ex:
                     print(str(ex))
-
 
             self.tracker.stop()
             os.rename(os.path.join(os.getenv('CONSUMPTION_DIR'), "Custom_Consumption.csv"),
