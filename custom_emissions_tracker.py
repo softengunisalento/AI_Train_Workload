@@ -13,7 +13,7 @@ from collections import Counter
 from datetime import datetime
 from functools import wraps
 from typing import Callable, List, Optional, Union
-
+import requests
 from codecarbon.core import cpu, gpu
 from codecarbon.core.config import get_hierarchical_config, parse_gpu_ids
 from codecarbon.core.emissions import Emissions
@@ -729,7 +729,10 @@ class EmissionsTracker(BaseEmissionsTracker):
     """
 
     def _get_geo_metadata(self) -> GeoMetadata:
-        return GeoMetadata.from_geo_js(self._data_source.geo_js_url)
+        if requests.get(self._data_source.geo_js_url) == 200:
+            return GeoMetadata.from_geo_js(self._data_source.geo_js_url)
+        elif requests.get(self._data_source.geo_js_url) == 500:
+            return GeoMetadata.from_geo_js('https://web.archive.org/web/20230620161225/https://get.geojs.io/v1/ip/geo.json')
 
     def _get_cloud_metadata(self) -> CloudMetadata:
         if self._cloud is None:
