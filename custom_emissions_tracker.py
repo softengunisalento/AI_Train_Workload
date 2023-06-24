@@ -729,9 +729,9 @@ class EmissionsTracker(BaseEmissionsTracker):
     """
 
     def _get_geo_metadata(self) -> GeoMetadata:
-        if requests.get(self._data_source.geo_js_url) == 200:
+        if requests.get(self._data_source.geo_js_url).status_code == 200:
             return GeoMetadata.from_geo_js(self._data_source.geo_js_url)
-        elif requests.get(self._data_source.geo_js_url) == 500:
+        elif requests.get(self._data_source.geo_js_url).status_code == 500:
             return GeoMetadata.from_geo_js('https://web.archive.org/web/20230620161225/https://get.geojs.io/v1/ip/geo.json')
 
     def _get_cloud_metadata(self) -> CloudMetadata:
