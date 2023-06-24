@@ -2,6 +2,7 @@ import os
 import sys
 from custom_emissions_tracker import EmissionsTracker
 from sklearn import metrics
+import tensorflow as tf
 from sklearn.linear_model import SGDOneClassSVM
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, Input
@@ -17,7 +18,7 @@ import subprocess
 from dotenv import load_dotenv
 
 load_dotenv()
-
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
 class Workload:
     def __init__(self, measure_power_secs):
@@ -116,7 +117,7 @@ class Workload:
 
         autoencoder.summary()
         history = autoencoder.fit(X_train, X_train,
-                                  epochs=20,
+                                  epochs=10,
                                   batch_size=batch_size,
                                   validation_data=(X_test, X_test),
                                   callbacks=EarlyStop,
@@ -156,13 +157,13 @@ class Workload:
     def grid_search_autoencoder(self):
         grid_res = []
         learing_rates = [0.1, 0.001, 0.0001, 0.00001]
-        batch_size = [32, 64, 128, 256]
+        batch_size = [64, 128, 256]
         act_func = ['sigmoid', 'tanh', 'relu', 'elu']
 
         for learn in learing_rates:
             for b in batch_size:
                 for act in act_func:
-                    print(f'params:  learning {learn}')
+                    print(f'params:  learning {learn}, batch-size {b}, function {act}')
                     grid_res.append(
                         {
                             'batch_size': b,
