@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 load_dotenv()
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
+
 class Workload:
     def __init__(self, measure_power_secs):
         self.tracker = EmissionsTracker(measure_power_secs=measure_power_secs, tracking_mode='process')
@@ -136,12 +137,15 @@ class Workload:
         model_sgd = SGDOneClassSVM(random_state=random_state, nu=nu, fit_intercept=fit_intercept, shuffle=shuffle,
                                    tol=tol)
         model_sgd.fit(X_train)
-        y_pred = model_sgd.predict(X_test)
+        y_test = test['Class']
+        pred = model_sgd.predict(X_test)
+        y_pred = pred
         y_pred[y_pred == 1] = 0
         y_pred[y_pred == -1] = 1
-        return metrics.roc_auc_score(X_test, y_pred)
+        return metrics.roc_auc_score(y_test, y_pred)
 
     def grid_search_svm(self):
+        grid_res = []
         random_state = [42, 142, 1420, 14200, 142000, 1420000, 14200000]
         nu = [0.1, 0.01, 0.001, 0.0001, 0.0001, 0.00001]
         tol = [1e-4, 1e-5, 1e-6, 1e-7, 1e-8]
@@ -152,7 +156,13 @@ class Workload:
                 for t in tol:
                     for interc in fit_intercept:
                         for shuf in shuffle:
-                            self.svm(random_state=rand_state, nu=n, tol=t, shuffle=shuf, fit_intercept=interc)
+                            grid_res.append({
+                                'auc': self.svm(random_state=rand_state, nu=n, tol=t, shuffle=shuf,
+                                                fit_intercept=interc)
+                            })
+        best_auc = sorted(grid_res, key=lambda d: d['auc'])[-1]
+        print(f"Best auc:{best_auc['auc']}. Parameters:{best_auc}")
+
 
     def grid_search_autoencoder(self):
         grid_res = []
