@@ -15,7 +15,7 @@ from sklearn.ensemble import IsolationForest
 from sklearn.metrics import f1_score, roc_auc_score
 from custom_emissions_tracker import EmissionsTracker
 from pyJoules.device.rapl_device import RaplPackageDomain
-from pyJoules.device.nvidia_device import NvidiaGPUDomain
+#from pyJoules.device.nvidia_device import NvidiaGPUDomain
 from pyJoules.handler.csv_handler import CSVHandler
 import subprocess
 from dotenv import load_dotenv
