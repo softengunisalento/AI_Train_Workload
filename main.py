@@ -10,7 +10,7 @@ if __name__ == '__main__':
     selected_workload = sys.argv[1]
     csv_handler = CSVHandler('result.csv')
     workload_algorithm = workload.Workload(measure_power_secs=5*60)
-    with EnergyContext(handler=csv_handler, domains=[RaplPackageDomain(1), NvidiaGPUDomain(0)], start_tag='foo') as ctx:
+    with EnergyContext(handler=csv_handler,  start_tag='foo') as ctx:
         workload_algorithm.compute_workload_consumption(selected_workload)
 
     csv_handler.save_data()
