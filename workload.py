@@ -16,6 +16,7 @@ from sklearn.metrics import f1_score, roc_auc_score
 from custom_emissions_tracker import EmissionsTracker
 import subprocess
 from dotenv import load_dotenv
+from pyJoules.energy_meter import measure_energy
 
 load_dotenv()
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
@@ -23,7 +24,7 @@ print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
 class Workload:
     def __init__(self, measure_power_secs):
-        self.tracker = EmissionsTracker(measure_power_secs=measure_power_secs, tracking_mode='process')
+
         try:
             print('THIS IS ENV ', os.getenv('DATASET_CSV'))
 
@@ -184,33 +185,23 @@ class Workload:
                     )
         best_auc = sorted(grid_res, key=lambda d: d['auc'])[-1]
         print(f"Best auc:{best_auc['auc']}. Parameters:{best_auc}")
-
+    @measure_energy()
     def compute_workload_consumption(self, workload: str):
-        try:
 
-            if os.path.exists(f"{os.getenv('CONSUMPTION_DIR')}/{workload}_consumption.csv"):
-                os.remove(f"{os.getenv('CONSUMPTION_DIR')}/{workload}_consumption.csv")
-            if os.path.exists(f"{os.getenv('CONSUMPTION_DIR')}/Custom_consumption.csv"):
-                os.remove(f"{os.getenv('CONSUMPTION_DIR')}/Custom_consumption.csv")
-
-            print('-Start tracking energy consumption-')
-            self.tracker.start()
-            if workload == 'isolation_forrest':
-                self.grid_search_isolation_forrest()
-            if workload == 'svm':
-                self.grid_search_svm()
-            if workload == 'autoencoder':
-                self.grid_search_autoencoder()
-            if workload == 'hf_sca':
-                try:
-                    print("HF_SCA i starting")
-                    subprocess.run(['python', os.getenv('HF_SCA'), "--gpu", "0"])
-                    print("HF_SCA job is completed")
-                except Exception as ex:
-                    print(str(ex))
-
-            self.tracker.stop()
-            os.rename(os.path.join(os.getenv('CONSUMPTION_DIR'), "Custom_Consumption.csv"),
-                      os.path.join(os.getenv('CONSUMPTION_DIR'), f"{workload}.csv"))
-        except Exception as ex:
-            print(ex)
+        print('-Start tracking energy consumption-')
+        for i in range(1000000000):
+            q=i+i
+        print('fine tracking')
+        # if workload == 'isolation_forrest':
+        #     self.grid_search_isolation_forrest()
+        # if workload == 'svm':
+        #     self.grid_search_svm()
+        # if workload == 'autoencoder':
+        #     self.grid_search_autoencoder()
+        # if workload == 'hf_sca':
+        #     try:
+        #         print("HF_SCA i starting")
+        #         subprocess.run(['python', os.getenv('HF_SCA'), "--gpu", "0"])
+        #         print("HF_SCA job is completed")
+        #     except Exception as ex:
+        #         print(str(ex))
