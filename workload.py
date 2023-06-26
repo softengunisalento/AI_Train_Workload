@@ -190,7 +190,7 @@ class Workload:
         print(f"Best auc:{best_auc['auc']}. Parameters:{best_auc}")
 
     csv_handler = CSVHandler('result.csv')
-    @measure_energy(domains=[RaplPackageDomain(1)], handler=csv_handler)
+    @measure_energy( handler=csv_handler)
     def compute_workload_consumption(self, workload: str):
 
         print('-Start tracking energy consumption-')
