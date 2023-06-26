@@ -16,6 +16,7 @@ from sklearn.metrics import f1_score, roc_auc_score
 from custom_emissions_tracker import EmissionsTracker
 from pyJoules.device.rapl_device import RaplPackageDomain
 from pyJoules.device.nvidia_device import NvidiaGPUDomain
+from pyJoules.handler.csv_handler import CSVHandler
 import subprocess
 from dotenv import load_dotenv
 from pyJoules.energy_meter import measure_energy
@@ -187,7 +188,9 @@ class Workload:
                     )
         best_auc = sorted(grid_res, key=lambda d: d['auc'])[-1]
         print(f"Best auc:{best_auc['auc']}. Parameters:{best_auc}")
-    @measure_energy(domains=[RaplPackageDomain(1), NvidiaGPUDomain(0)])
+
+    csv_handler = CSVHandler('result.csv')
+    @measure_energy(domains=[RaplPackageDomain(1)], handler=csv_handler)
     def compute_workload_consumption(self, workload: str):
 
         print('-Start tracking energy consumption-')
@@ -207,3 +210,5 @@ class Workload:
         #         print("HF_SCA job is completed")
         #     except Exception as ex:
         #         print(str(ex))
+
+    csv_handler.save_data()
