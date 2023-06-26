@@ -196,7 +196,7 @@ class Workload:
         print('-Start tracking energy consumption-')
 
 
-        if workload == 'isolation_forrest':
+        if workload == 'isolation_forest':
             self.grid_search_isolation_forrest()
         if workload == 'svm':
             self.grid_search_svm()
