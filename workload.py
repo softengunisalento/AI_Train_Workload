@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 from custom_emissions_tracker import EmissionsTracker
 from sklearn import metrics
@@ -13,13 +14,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import f1_score, roc_auc_score
-from custom_emissions_tracker import EmissionsTracker
-from pyJoules.device.rapl_device import RaplPackageDomain
-#from pyJoules.device.nvidia_device import NvidiaGPUDomain
-from pyJoules.handler.csv_handler import CSVHandler
-import subprocess
+
+
 from dotenv import load_dotenv
-from pyJoules.energy_meter import measure_energy
+
 
 load_dotenv()
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
@@ -196,21 +194,19 @@ class Workload:
     def compute_workload_consumption(self, workload: str):
 
         print('-Start tracking energy consumption-')
-        for i in range(1000000000):
-            q=i+i
-        print('fine tracking')
 
-        # if workload == 'isolation_forrest':
-        #     self.grid_search_isolation_forrest()
-        # if workload == 'svm':
-        #     self.grid_search_svm()
-        # if workload == 'autoencoder':
-        #     self.grid_search_autoencoder()
-        # if workload == 'hf_sca':
-        #     try:
-        #         print("HF_SCA i starting")
-        #         subprocess.run(['python', os.getenv('HF_SCA'), "--gpu", "0"])
-        #         print("HF_SCA job is completed")
-        #     except Exception as ex:
-        #         print(str(ex))
+
+        if workload == 'isolation_forrest':
+            self.grid_search_isolation_forrest()
+        if workload == 'svm':
+            self.grid_search_svm()
+        if workload == 'autoencoder':
+            self.grid_search_autoencoder()
+        if workload == 'hf_sca':
+            try:
+                print("HF_SCA i starting")
+                subprocess.run(['python', os.getenv('HF_SCA'), "--gpu", "0"])
+                print("HF_SCA job is completed")
+            except Exception as ex:
+                print(str(ex))
 
