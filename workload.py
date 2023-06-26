@@ -26,7 +26,7 @@ print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
 
 class Workload:
-    def __init__(self, measure_power_secs):
+    def __init__(self,  measure_power_secs):
 
         try:
             print('THIS IS ENV ', os.getenv('DATASET_CSV'))
@@ -34,6 +34,7 @@ class Workload:
         except Exception as ex:
             print("EXCEPTION, I TRIED TO READ")
         self.df = pd.read_csv(os.getenv('DATASET_CSV'))
+
 
     # TODO try to implet here
     def hf_sca(self):
@@ -189,14 +190,16 @@ class Workload:
         best_auc = sorted(grid_res, key=lambda d: d['auc'])[-1]
         print(f"Best auc:{best_auc['auc']}. Parameters:{best_auc}")
 
-    csv_handler = CSVHandler('result.csv')
-    @measure_energy( handler=csv_handler)
+
+
+
     def compute_workload_consumption(self, workload: str):
 
         print('-Start tracking energy consumption-')
         for i in range(1000000000):
             q=i+i
         print('fine tracking')
+
         # if workload == 'isolation_forrest':
         #     self.grid_search_isolation_forrest()
         # if workload == 'svm':
@@ -211,4 +214,3 @@ class Workload:
         #     except Exception as ex:
         #         print(str(ex))
 
-    csv_handler.save_data()
