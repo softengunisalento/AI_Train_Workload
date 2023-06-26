@@ -14,6 +14,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import f1_score, roc_auc_score
 from custom_emissions_tracker import EmissionsTracker
+from pyJoules.device.rapl_device import RaplPackageDomain
+from pyJoules.device.nvidia_device import NvidiaGPUDomain
 import subprocess
 from dotenv import load_dotenv
 from pyJoules.energy_meter import measure_energy
@@ -185,7 +187,7 @@ class Workload:
                     )
         best_auc = sorted(grid_res, key=lambda d: d['auc'])[-1]
         print(f"Best auc:{best_auc['auc']}. Parameters:{best_auc}")
-    @measure_energy()
+    @measure_energy(domains=[RaplPackageDomain(1), NvidiaGPUDomain(0)])
     def compute_workload_consumption(self, workload: str):
 
         print('-Start tracking energy consumption-')
