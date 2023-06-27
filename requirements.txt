@@ -61,3 +61,4 @@ seaborn==0.12.2
 codecarbon~=2.1.4
 torch==2.0.1
 tqdm==4.65.0
+pynvml==11.4

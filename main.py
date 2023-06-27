@@ -5,7 +5,7 @@ import pandas as pd
 
 import workload
 import sys
-from tensorflow.python.client import device_lib
+#from tensorflow.python.client import device_lib
 from pyJoules.energy_meter import EnergyContext
 from pyJoules.handler.csv_handler import CSVHandler
 
@@ -13,7 +13,7 @@ from pyJoules.handler.csv_handler import CSVHandler
 
 import tensorflow as tf
 if __name__ == '__main__':
-    print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+    #print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
     selected_workload = sys.argv[1]
     track_mode = sys.argv[2]
