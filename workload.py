@@ -200,7 +200,7 @@ class Workload:
             print('-Start tracking energy consumption-')
             tracker.start()
             if workload == "prova":
-                for i in range(10000000000):
+                for i in range(100000000000):
                     a = i + i
             if workload == 'isolation_forest':
                 self.grid_search_isolation_forrest()

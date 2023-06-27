@@ -19,12 +19,12 @@ if __name__ == '__main__':
     track_mode = sys.argv[2]
     if track_mode == 'codecarbon':
         workload_algorithm = workload.Workload()
-        workload_algorithm.compute_workload_consumption(selected_workload)
+        workload_algorithm.compute_workload_consumption(selected_workload, cc=True)
     else:
         csv_handler = CSVHandler('result.csv')
         workload_algorithm = workload.Workload()
         with EnergyContext(handler=csv_handler,  start_tag=selected_workload) as ctx:
-            workload_algorithm.compute_workload_consumption(selected_workload, cc=True)
+            workload_algorithm.compute_workload_consumption(selected_workload)
 
         csv_handler.save_data()
 
