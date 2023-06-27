@@ -199,7 +199,7 @@ class Workload:
             tracker = EmissionsTracker(measure_power_secs=measure_power_secs, tracking_mode='process')
             print('-Start tracking energy consumption-')
             gpu = GPU.from_utils()
-            print("INFO GPU:",gpu)
+            print("INFO GPU:", gpu.description())
             tracker.start()
             if workload == "prova":
                 for i in range(1000000000):
