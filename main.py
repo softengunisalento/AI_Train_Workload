@@ -9,8 +9,9 @@ from tensorflow.python.client import device_lib
 from pyJoules.energy_meter import EnergyContext
 from pyJoules.handler.csv_handler import CSVHandler
 import tensorflow as tf
-print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
-# if __name__ == '__main__':
+if __name__ == '__main__':
+    print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+
 #     selected_workload = sys.argv[1]
 #     csv_handler = CSVHandler('result.csv')
 #     workload_algorithm = workload.Workload(measure_power_secs=5*60)
