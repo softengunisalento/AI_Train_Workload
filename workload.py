@@ -16,7 +16,7 @@ from sklearn.ensemble import IsolationForest
 from sklearn.metrics import f1_score, roc_auc_score
 from codecarbon.external.hardware import GPU
 
-gpu = GPU.from_utils()
+
 from custom_emissions_tracker import EmissionsTracker
 import subprocess
 from dotenv import load_dotenv
@@ -198,6 +198,8 @@ class Workload:
                 os.remove(f"{os.getenv('CONSUMPTION_DIR')}/Custom_consumption.csv")
             tracker = EmissionsTracker(measure_power_secs=measure_power_secs, tracking_mode='process')
             print('-Start tracking energy consumption-')
+            gpu = GPU.from_utils()
+            print("INFO GPU:",gpu)
             tracker.start()
             if workload == "prova":
                 for i in range(1000000000):
