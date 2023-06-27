@@ -2,7 +2,7 @@ import csv
 import time
 
 import pandas as pd
-import nvidia_smi
+
 import workload
 import sys
 from tensorflow.python.client import device_lib
@@ -10,8 +10,7 @@ from pyJoules.energy_meter import EnergyContext
 from pyJoules.handler.csv_handler import CSVHandler
 
 
-nvidia_smi.nvmlInit()
-handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
+
 import tensorflow as tf
 if __name__ == '__main__':
     print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
