@@ -14,17 +14,19 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import f1_score, roc_auc_score
+from codecarbon.external.hardware import GPU
 
-
+gpu = GPU.from_utils()
+from custom_emissions_tracker import EmissionsTracker
+import subprocess
 from dotenv import load_dotenv
-
 
 load_dotenv()
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
 
 class Workload:
-    def __init__(self,  measure_power_secs):
+    def __init__(self):
 
         try:
             print('THIS IS ENV ', os.getenv('DATASET_CSV'))
@@ -32,7 +34,6 @@ class Workload:
         except Exception as ex:
             print("EXCEPTION, I TRIED TO READ")
         self.df = pd.read_csv(os.getenv('DATASET_CSV'))
-
 
     # TODO try to implet here
     def hf_sca(self):
@@ -166,7 +167,6 @@ class Workload:
         best_auc = sorted(grid_res, key=lambda d: d['auc'])[-1]
         print(f"Best auc:{best_auc['auc']}. Parameters:{best_auc}")
 
-
     def grid_search_autoencoder(self):
         grid_res = []
         learing_rates = [0.1, 0.001, 0.0001, 0.00001]
@@ -188,25 +188,56 @@ class Workload:
         best_auc = sorted(grid_res, key=lambda d: d['auc'])[-1]
         print(f"Best auc:{best_auc['auc']}. Parameters:{best_auc}")
 
+    def compute_workload_consumption(self, workload: str, cc=False, measure_power_secs=5 * 60):
+        if cc:
 
 
+            if os.path.exists(f"{os.getenv('CONSUMPTION_DIR')}/{workload}_consumption.csv"):
+                os.remove(f"{os.getenv('CONSUMPTION_DIR')}/{workload}_consumption.csv")
+            if os.path.exists(f"{os.getenv('CONSUMPTION_DIR')}/Custom_consumption.csv"):
+                os.remove(f"{os.getenv('CONSUMPTION_DIR')}/Custom_consumption.csv")
+            tracker = EmissionsTracker(measure_power_secs=measure_power_secs, tracking_mode='process')
+            print('-Start tracking energy consumption-')
+            tracker.start()
+            if workload == "prova":
+                for i in range(10000000000):
+                    a = i + i
+            if workload == 'isolation_forest':
+                self.grid_search_isolation_forrest()
+            if workload == 'svm':
+                self.grid_search_svm()
+            if workload == 'autoencoder':
+                self.grid_search_autoencoder()
+            if workload == 'hf_sca':
+                try:
+                    print("HF_SCA i starting")
+                    subprocess.run(['python', os.getenv('HF_SCA'), "--gpu", "0"])
+                    print("HF_SCA job is completed")
 
-    def compute_workload_consumption(self, workload: str):
 
-        print('-Start tracking energy consumption-')
+                except Exception as ex:
+                    print(str(ex))
+            tracker.stop()
+            os.rename(os.path.join(os.getenv('CONSUMPTION_DIR'), "Custom_Consumption.csv"),
+                      os.path.join(os.getenv('CONSUMPTION_DIR'), f"{workload}.csv"))
+        else:
+            print('-Start tracking energy consumption-')
+
+            if workload == "prova":
+                for i in range(10000000000):
+                    a = i + i
+            if workload == 'isolation_forest':
+                self.grid_search_isolation_forrest()
+            if workload == 'svm':
+                self.grid_search_svm()
+            if workload == 'autoencoder':
+                self.grid_search_autoencoder()
+            if workload == 'hf_sca':
+                try:
+                    print("HF_SCA i starting")
+                    subprocess.run(['python', os.getenv('HF_SCA'), "--gpu", "0"])
+                    print("HF_SCA job is completed")
 
 
-        if workload == 'isolation_forest':
-            self.grid_search_isolation_forrest()
-        if workload == 'svm':
-            self.grid_search_svm()
-        if workload == 'autoencoder':
-            self.grid_search_autoencoder()
-        if workload == 'hf_sca':
-            try:
-                print("HF_SCA i starting")
-                subprocess.run(['python', os.getenv('HF_SCA'), "--gpu", "0"])
-                print("HF_SCA job is completed")
-            except Exception as ex:
-                print(str(ex))
-
+                except Exception as ex:
+                    print(str(ex))
