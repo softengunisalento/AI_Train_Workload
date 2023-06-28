@@ -1,6 +1,9 @@
 import os
 import subprocess
 import sys
+
+import numpy as np
+
 from custom_emissions_tracker import EmissionsTracker
 from sklearn import metrics
 import tensorflow as tf
@@ -121,7 +124,7 @@ class Workload:
         EarlyStop = EarlyStopping(monitor='accuracy', patience=5, verbose=1)
 
         autoencoder.summary()
-        history = autoencoder.fit(X_train, X_train,
+        history = autoencoder.fit(np.asarray(X_train), np.asarray(X_train),
                                   epochs=10,
                                   batch_size=batch_size,
                                   validation_data=(X_test, X_test),
