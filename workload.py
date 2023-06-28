@@ -124,10 +124,10 @@ class Workload:
         EarlyStop = EarlyStopping(monitor='accuracy', patience=5, verbose=1)
 
         autoencoder.summary()
-        X_train = np.array([np.array(val) for val in X_train])
-
-
-        X_train = tf.cast(X_train, dtype=tf.float32)
+        # X_train = np.array([np.array(val) for val in X_train])
+        #
+        #
+        # X_train = tf.cast(X_train, dtype=tf.float32)
 
         history = autoencoder.fit(X_train, X_train,
                                   epochs=10,
