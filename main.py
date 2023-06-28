@@ -13,8 +13,8 @@ from pyJoules.handler.csv_handler import CSVHandler
 
 import tensorflow as tf
 if __name__ == '__main__':
-    print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
-    print("GPU devices:", tf.test.gpu_device_name())
+    # print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+    # print("GPU devices:", tf.test.gpu_device_name())
 
     selected_workload = sys.argv[1]
     track_mode = sys.argv[2]

@@ -124,7 +124,7 @@ class Workload:
         EarlyStop = EarlyStopping(monitor='accuracy', patience=5, verbose=1)
 
         autoencoder.summary()
-        X_train = np.asarray(X_train).astype(np.float32)
+        #X_train = np.asarray(X_train).astype(np.float32)
         #
         #
         # X_train = tf.cast(X_train, dtype=tf.float32)
