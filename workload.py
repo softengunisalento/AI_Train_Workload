@@ -124,7 +124,7 @@ class Workload:
         EarlyStop = EarlyStopping(monitor='accuracy', patience=5, verbose=1)
 
         autoencoder.summary()
-        history = autoencoder.fit(np.asarray(X_train), np.asarray(X_train),
+        history = autoencoder.fit(np.asarray(X_train).astype('float32'), np.asarray(X_train).astype('float32'),
                                   epochs=10,
                                   batch_size=batch_size,
                                   validation_data=(X_test, X_test),
