@@ -125,6 +125,7 @@ class Workload:
 
         autoencoder.summary()
         X_train = np.asarray(X_train).astype(np.float32)
+        X_test = np.asarray(X_test).astype(np.float32)
         #
         #
         # X_train = tf.cast(X_train, dtype=tf.float32)
